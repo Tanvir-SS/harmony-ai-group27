@@ -1,10 +1,12 @@
 seed: 27
+run_id: "run7"
+
 paths:
   gtzan_root: "data/raw/gtzan"
   splits_dir: "data/manifests"   # <- was data/splits
   features_dir: "features"
-  model_path: "models/baseline_dt.pkl"
-  reports_dir: "reports"
+  model_path: "models/{run_id}_dt.pkl"
+  reports_dir: "reports/{run_id}"
 
 features:
   sample_rate: 22050
@@ -18,8 +20,9 @@ model:
   type: "DecisionTreeClassifier"
   params:
     criterion: "gini"
-    max_depth: 30
-    random_state: 27
+    max_depth: 10
+    min_samples_split: 5
+    min_samples_leaf: 2
 
 eval:
   split: "test"

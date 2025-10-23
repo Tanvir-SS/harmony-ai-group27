@@ -4,6 +4,12 @@ import yaml
 def load_config(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+
+    run_id = cfg.get("run_id", "default")
+    for key, val in cfg.get("paths", {}).items():
+        if isinstance(val, str):
+            cfg["paths"][key] = val.format(run_id=run_id)
+            
     # Normalize and ensure dirs
     _ensure_dirs(cfg)
     return cfg

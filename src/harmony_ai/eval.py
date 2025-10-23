@@ -22,7 +22,7 @@ def evaluate_and_report(cfg: dict, model) -> None:
     os.makedirs(reports_dir, exist_ok=True)
 
     # Save metrics JSON
-    metrics_path = os.path.join(reports_dir, "baseline_metrics.json")
+    metrics_path = os.path.join(reports_dir, "metrics.json")
     with open(metrics_path, "w", encoding="utf-8") as f:
         json.dump({"accuracy": acc, "n_samples": int(len(y_true))}, f, indent=2)
     print(f"Saved metrics to {metrics_path}")
