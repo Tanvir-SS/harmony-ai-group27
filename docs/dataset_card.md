@@ -1,0 +1,1 @@
+# Dataset Card\n\nGTZAN: 10 genres, 1000 clips, 30s, 22.05kHz mono WAV. Add licensing and provenance notes here.\n

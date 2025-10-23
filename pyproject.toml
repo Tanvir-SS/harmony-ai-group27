@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "harmony-ai"
+version = "0.1.0"
+description = "Genre classification & playlist grouping (GTZAN + Decision Tree)"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = {text = "MIT"}
+authors = [
+  { name = "Group 27 - HarmonyAI", email = "group27@example.com" }
+]
+
+dependencies = [
+  "numpy>=1.25",
+  "pandas>=2.0",
+  "scikit-learn>=1.3",
+  "librosa>=0.10.1,<0.11",
+  "scipy>=1.10",
+  "matplotlib>=3.7",
+  "seaborn>=0.13",
+  "soundfile>=0.12",
+  "audioread>=3.0",
+  "pyyaml>=6.0",
+  "joblib>=1.3"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+  "ruff>=0.6",
+  "black>=24.0",
+  "mypy>=1.7",
+  "pre-commit>=3.6",
+]
+api = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+]
+
+[project.scripts]
+harmonyai = "harmony_ai.cli:main"
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E","F","I","UP","B"]
+ignore = ["E501"]
+src = ["src"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/harmony_ai"]

@@ -1,0 +1,25 @@
+seed: 27
+paths:
+  gtzan_root: "data/raw/gtzan"
+  splits_dir: "data/splits"
+  features_dir: "features"
+  model_path: "models/baseline_dt.pkl"
+  reports_dir: "reports"
+
+features:
+  sample_rate: 22050
+  n_mfcc: 13
+  use_chroma: true
+  use_spectral_centroid: true
+  use_zcr: true
+  tempo: true
+
+model:
+  type: "DecisionTreeClassifier"
+  params:
+    criterion: "gini"
+    max_depth: 30
+    random_state: 27
+
+eval:
+  split: "test"
