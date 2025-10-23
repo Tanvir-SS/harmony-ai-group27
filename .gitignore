@@ -44,3 +44,7 @@ features/*.csv
 models/*.pkl
 reports/*.png
 reports/*.json
+features/*.csv
+models/*.pkl
+reports/*.png
+reports/*.json
