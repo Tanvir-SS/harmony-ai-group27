@@ -10,5 +10,6 @@ reports/*.json
 features/*.csv
 data/raw/gtzan/
 !data/manifests/
+data/manifests/*.csv
 !data/splits/
 data/splits/*.csv

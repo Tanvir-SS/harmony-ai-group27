@@ -47,15 +47,20 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> list[float]
 
     return feats
 
-def _read_split_csv(csv_path: str) -> list[tuple[str,str]]:
-    rows = []
+def _read_split_csv(csv_path: str) -> list[tuple[str, str]]:
+    import pandas as pd
+    import os
     if not os.path.exists(csv_path):
-        return rows
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        r = csv.DictReader(f)
-        for row in r:
-            rows.append((row["filepath"], row["label"]))
-    return rows
+        return []
+    df = pd.read_csv(csv_path)
+    if "filepath" not in df.columns:
+        raise ValueError(f"{csv_path} must have a 'filepath' column")
+    # accept either 'label' (old) or 'genre' (yours)
+    label_col = "label" if "label" in df.columns else ("genre" if "genre" in df.columns else None)
+    if label_col is None:
+        raise ValueError(f"{csv_path} must have a 'label' or 'genre' column")
+    return list(zip(df["filepath"].tolist(), df[label_col].tolist()))
+
 
 def extract_features_for_splits(cfg: dict) -> None:
     splits_dir = cfg["paths"]["splits_dir"]

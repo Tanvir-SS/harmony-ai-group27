@@ -1,7 +1,7 @@
 seed: 27
 paths:
   gtzan_root: "data/raw/gtzan"
-  splits_dir: "data/splits"
+  splits_dir: "data/manifests"   # <- was data/splits
   features_dir: "features"
   model_path: "models/baseline_dt.pkl"
   reports_dir: "reports"
