@@ -1,15 +1,38 @@
+# --- Env & OS junk ---
 .venv/
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
 *.ipynb_checkpoints
+.mypy_cache/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Build outputs ---
+dist/
+build/
+*.egg-info/
+
+# --- Large artifacts (stay out of git) ---
 models/*.pkl
 reports/*.png
 reports/*.json
-features/*.csv
+
+# --- Dataset: keep raw audio out of git ---
 data/raw/gtzan/
+
+# --- Manifests: keep these tracked ---
 !data/manifests/
-data/manifests/*.csv
+!data/manifests/*.csv
+
+# (Optional) If you also use legacy splits, keep them tracked too
 !data/splits/
-data/splits/*.csv
+!data/splits/*.csv
+
+# --- Features: track only CSVs (ignore anything else here) ---
+features/*
+!features/*.csv
+!features/.gitkeep
