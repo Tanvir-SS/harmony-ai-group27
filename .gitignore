@@ -36,3 +36,7 @@ data/raw/gtzan/
 features/*
 !features/*.csv
 !features/.gitkeep
+features/*.csv
+models/*.pkl
+reports/*.png
+reports/*.json
