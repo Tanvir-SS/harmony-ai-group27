@@ -8,6 +8,7 @@ models/*.pkl
 reports/*.png
 reports/*.json
 features/*.csv
-data/*/
+data/raw/gtzan/
+!data/manifests/
 !data/splits/
 data/splits/*.csv

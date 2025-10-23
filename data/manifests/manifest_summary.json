@@ -1,0 +1,71 @@
+{
+  "seed": 42,
+  "counts": {
+    "all": {
+      "blues": 100,
+      "classical": 100,
+      "country": 100,
+      "disco": 100,
+      "hiphop": 100,
+      "jazz": 100,
+      "metal": 100,
+      "pop": 100,
+      "reggae": 100,
+      "rock": 100
+    },
+    "train": {
+      "blues": 80,
+      "classical": 80,
+      "country": 80,
+      "disco": 80,
+      "hiphop": 80,
+      "jazz": 80,
+      "metal": 80,
+      "pop": 80,
+      "reggae": 80,
+      "rock": 80
+    },
+    "val": {
+      "blues": 10,
+      "classical": 10,
+      "country": 10,
+      "disco": 10,
+      "hiphop": 10,
+      "jazz": 10,
+      "metal": 10,
+      "pop": 10,
+      "reggae": 10,
+      "rock": 10
+    },
+    "test": {
+      "blues": 10,
+      "classical": 10,
+      "country": 10,
+      "disco": 10,
+      "hiphop": 10,
+      "jazz": 10,
+      "metal": 10,
+      "pop": 10,
+      "reggae": 10,
+      "rock": 10
+    },
+    "smoke": {
+      "blues": 2,
+      "classical": 2,
+      "country": 2,
+      "disco": 2,
+      "hiphop": 2,
+      "jazz": 2,
+      "metal": 2,
+      "pop": 2,
+      "reggae": 2,
+      "rock": 2
+    }
+  },
+  "split_hashes": {
+    "train": "595062da81094a61",
+    "val": "3e3b7423291338dc",
+    "test": "6b20c2e6427698b5",
+    "smoke": "52b22cb8c4220c15"
+  }
+}
