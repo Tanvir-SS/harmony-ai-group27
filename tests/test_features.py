@@ -6,4 +6,4 @@ def test_feature_names_len():
     cfg = load_config("configs/baseline.yaml")
     names = feature_names(cfg["features"])
     # tempo + zcr + centroid + 13 mfcc + 12 chroma = 29
-    assert len(names) == 29
+    assert len(names) == 28
