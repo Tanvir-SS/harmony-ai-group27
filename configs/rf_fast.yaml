@@ -1,0 +1,43 @@
+seed: 27
+run_id: "rf_fast1"
+
+paths:
+  gtzan_root: "data/raw/gtzan"
+  splits_dir: "data/manifests"
+  features_dir: "features_fast"
+  model_path: "models/{run_id}_rf.pkl"
+  reports_dir: "reports/{run_id}"
+
+features:
+  sample_rate: 22050
+  duration: 15.0
+  offset: 0.0
+  res_type: "kaiser_fast"
+
+  tempo: false
+  use_zcr: true
+  use_spectral_centroid: true
+  use_rmse: true
+  use_spectral_bandwidth: true
+  use_spectral_rolloff: true
+
+  n_mfcc: 10
+  use_mfcc_delta: true
+  use_mfcc_delta2: false
+
+  use_chroma: true
+  use_spectral_contrast: false
+  use_tonnetz: false
+
+model:
+  type: "RandomForestClassifier"
+  params:
+    n_estimators: 300
+    max_depth: 20
+    max_features: "sqrt"
+    class_weight: "balanced"
+    n_jobs: -1
+    random_state: 27
+
+eval:
+  split: "test"

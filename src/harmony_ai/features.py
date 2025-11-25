@@ -114,7 +114,18 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]
     Includes tempo, ZCR, spectral features, MFCCs + deltas, chroma, etc.
     """
     sr = int(cfg_feat.get("sample_rate", 22050))
-    y, sr = librosa.load(audio_path, sr=sr, mono=True)
+    duration = float(cfg_feat.get("duration", 15.0))   # FAST: only first 15s
+    offset = float(cfg_feat.get("offset", 0.0))
+    res_type = cfg_feat.get("res_type", "kaiser_fast")
+
+    y, sr = librosa.load(
+        audio_path,
+        sr=sr,
+        mono=True,
+        duration=duration,
+        offset=offset,
+        res_type=res_type,
+    )
 
     feats: List[float] = []
 
