@@ -1,9 +1,11 @@
 {
-  "best_score_macro_f1": 0.4466193636510824,
+  "best_score_macro_f1": 0.5181442402127269,
   "best_params": {
+    "class_weight": "balanced",
     "criterion": "gini",
-    "max_depth": 15,
+    "max_depth": 10,
+    "max_features": null,
     "min_samples_leaf": 1,
-    "min_samples_split": 5
+    "min_samples_split": 2
   }
-} 
+}

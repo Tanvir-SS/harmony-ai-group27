@@ -11,10 +11,15 @@ paths:
 features:
   sample_rate: 22050
   n_mfcc: 13
-  use_chroma: true
-  use_spectral_centroid: true
-  use_zcr: true
   tempo: true
+  use_zcr: true
+  use_spectral_centroid: true
+  use_chroma: true
+  use_rmse: true
+  use_spectral_bandwidth: true
+  use_spectral_rolloff: true
+  use_spectral_contrast: true
+  use_tonnetz: true
 
 model:
   type: "DecisionTreeClassifier"

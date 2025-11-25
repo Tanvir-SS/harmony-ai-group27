@@ -41,18 +41,49 @@ def feature_names(cfg_feat: dict) -> List[str]:
     Construct the feature column names in the exact order they are computed.
     """
     names: List[str] = []
+
+    # Tempo (single value)
     if cfg_feat.get("tempo", True):
         names.append("tempo")
-    if cfg_feat.get("use_zcr", True):
-        names.append("zcr_mean")
-    if cfg_feat.get("use_spectral_centroid", True):
-        names.append("spectral_centroid_mean")
 
+    # ZCR mean + std
+    if cfg_feat.get("use_zcr", True):
+        names += ["zcr_mean", "zcr_std"]
+
+    # Spectral centroid mean + std
+    if cfg_feat.get("use_spectral_centroid", True):
+        names += ["spectral_centroid_mean", "spectral_centroid_std"]
+    # RMSE mean + std
+    if cfg_feat.get("use_rmse", True):
+        names += ["rmse_mean", "rmse_std"]
+
+    # Spectral bandwidth mean + std
+    if cfg_feat.get("use_spectral_bandwidth", True):
+        names += ["spec_bandwidth_mean", "spec_bandwidth_std"]
+
+    # Spectral rolloff mean + std
+    if cfg_feat.get("use_spectral_rolloff", True):
+        names += ["spec_rolloff_mean", "spec_rolloff_std"]
+
+    # Spectral contrast: 7 frequency bands by default
+    if cfg_feat.get("use_spectral_contrast", True):
+        names += [f"spec_contrast_{i+1}_mean" for i in range(7)]
+        names += [f"spec_contrast_{i+1}_std"  for i in range(7)]
+
+    # Tonnetz: 6 dimensions
+    if cfg_feat.get("use_tonnetz", True):
+        names += [f"tonnetz_{i+1}_mean" for i in range(6)]
+        names += [f"tonnetz_{i+1}_std"  for i in range(6)]
+
+    # MFCC mean + std for each coefficient
     n_mfcc = int(cfg_feat.get("n_mfcc", 13))
     names += [f"mfcc_{i+1}_mean" for i in range(n_mfcc)]
+    names += [f"mfcc_{i+1}_std" for i in range(n_mfcc)]
 
+    # Chroma mean + std for each of 12 bins
     if cfg_feat.get("use_chroma", True):
         names += [f"chroma_{i+1}_mean" for i in range(12)]
+        names += [f"chroma_{i+1}_std" for i in range(12)]
 
     return names
 
@@ -68,36 +99,84 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]
     feats: List[float] = []
 
     # Helpers
-    def _mean(x: np.ndarray) -> float:
-        return float(np.nanmean(x)) if x.size else 0.0
+    def _mean_std(x: np.ndarray) -> tuple[float, float]:
+        if x.size == 0:
+            return 0.0, 0.0
+        x = np.asarray(x, dtype=float)
+        return float(np.nanmean(x)), float(np.nanstd(x))
 
-    # Tempo (BPM)
+    # Tempo (BPM) – single scalar
     if cfg_feat.get("tempo", True):
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
         feats.append(float(tempo))
 
-    # Zero-crossing rate (mean)
+    # Zero-crossing rate (mean, std)
     if cfg_feat.get("use_zcr", True):
         zcr = librosa.feature.zero_crossing_rate(y=y)  # shape (1, frames)
-        feats.append(_mean(zcr))
+        m, s = _mean_std(zcr)
+        feats.extend([m, s])
 
-    # Spectral centroid (mean)
+    # Spectral centroid (mean, std)
     if cfg_feat.get("use_spectral_centroid", True):
         sc = librosa.feature.spectral_centroid(y=y, sr=sr)  # shape (1, frames)
-        feats.append(_mean(sc))
+        m, s = _mean_std(sc)
+        feats.extend([m, s])
 
-    # MFCC means
+    # MFCC mean + std per coefficient
     n_mfcc = int(cfg_feat.get("n_mfcc", 13))
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)  # shape (n_mfcc, frames)
-    feats += [ _mean(mfcc[i]) for i in range(n_mfcc) ]
+    for i in range(n_mfcc):
+        m, s = _mean_std(mfcc[i])
+        feats.extend([m, s])
 
-    # 12-bin chroma means
+    # 12-bin chroma mean + std per bin
     if cfg_feat.get("use_chroma", True):
         chroma = librosa.feature.chroma_stft(y=y, sr=sr)  # shape (12, frames)
-        feats += [ _mean(chroma[i]) for i in range(12) ]
+        for i in range(12):
+            m, s = _mean_std(chroma[i])
+            feats.extend([m, s])
+    # RMSE (root-mean-square energy)
+    if cfg_feat.get("use_rmse", True):
+        rmse = librosa.feature.rms(y=y)
+        m, s = _mean_std(rmse)
+        feats.extend([m, s])
+
+    # Spectral bandwidth
+    if cfg_feat.get("use_spectral_bandwidth", True):
+        sbw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
+        m, s = _mean_std(sbw)
+        feats.extend([m, s])
+
+    # Spectral rolloff
+    if cfg_feat.get("use_spectral_rolloff", True):
+        roll = librosa.feature.spectral_rolloff(y=y, sr=sr)
+        m, s = _mean_std(roll)
+        feats.extend([m, s])
+
+    # Spectral contrast
+    if cfg_feat.get("use_spectral_contrast", True):
+        contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
+        for i in range(contrast.shape[0]):
+            m, s = _mean_std(contrast[i])
+            feats.extend([m, s])
+
+    # Tonnetz (uses harmonic component)
+    if cfg_feat.get("use_tonnetz", True):
+        y_harm = librosa.effects.harmonic(y)
+        tonnetz = librosa.feature.tonnetz(y=y_harm, sr=sr)
+        for i in range(tonnetz.shape[0]):
+            m, s = _mean_std(tonnetz[i])
+            feats.extend([m, s])
 
     # Replace any lingering NaNs/Infs
-    feats = list(np.nan_to_num(np.asarray(feats, dtype=float), nan=0.0, posinf=0.0, neginf=0.0))
+    feats = list(
+        np.nan_to_num(
+            np.asarray(feats, dtype=float),
+            nan=0.0,
+            posinf=0.0,
+            neginf=0.0,
+        )
+    )
     return feats
 
 

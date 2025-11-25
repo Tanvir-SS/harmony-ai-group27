@@ -54,11 +54,14 @@ def tune_decision_tree(cfg: dict) -> dict:
     clf = DecisionTreeClassifier(**base_params)
 
     param_grid = {
-        "criterion": ["gini", "entropy"],
-        "max_depth": [10, 15, 20, None],
-        "min_samples_split": [2, 5, 10],
-        "min_samples_leaf": [1, 2, 5],
-    }
+    "criterion": ["gini", "entropy"],
+    "max_depth": [10, 15, 20, None],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 5],
+    "max_features": [None, "sqrt", "log2"],
+    "class_weight": [None, "balanced"],
+}
+
 
     scorer = make_scorer(f1_score, average="macro")
     grid = GridSearchCV(
