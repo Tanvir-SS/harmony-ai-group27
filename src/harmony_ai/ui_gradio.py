@@ -11,7 +11,7 @@ from harmony_ai.model import load_model
 from harmony_ai.config import load_config
 
 
-CFG_PATH = "configs/rf_fast.yaml"
+CFG_PATH = "configs/rf.yaml" # or configs/rf.yaml
 cfg = load_config(CFG_PATH)
 
 feat_cfg = cfg["features"]
@@ -46,7 +46,7 @@ def classify_songs(files):
 
     X = pd.DataFrame(rows, columns=feat_cols)
 
-    # (keep your column alignment if you added it)
+    
     expected = getattr(model, "feature_names_in_", None)
     if expected is not None:
         X = X.reindex(columns=list(expected), fill_value=0.0)

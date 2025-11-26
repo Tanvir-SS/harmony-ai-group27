@@ -10,7 +10,7 @@ paths:
 
 features:
   sample_rate: 22050
-  duration: 15.0
+  duration: 30.0
   offset: 0.0
   res_type: "kaiser_fast"
 
