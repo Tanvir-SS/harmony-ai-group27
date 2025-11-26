@@ -20,13 +20,13 @@ pip install -e ".[dev,api]"
 # data/raw/gtzan/blues/*.wav, classical/*.wav, ...
 
 # 4) Run pipeline
-harmonyai splits --config configs/baseline.yaml
-harmonyai features --config configs/baseline.yaml
-harmonyai train --config configs/baseline.yaml
-harmonyai eval --config configs/baseline.yaml
+harmonyai splits --config configs/rf.yaml
+harmonyai features --config configs/rf.yaml
+harmonyai train --config configs/rf.yaml
+harmonyai eval --config configs/rf.yaml
 
 # Optional: run API after training
-uvicorn harmony_ai.api:app --reload --port 8000
+python -m harmony_ai.ui_gradio
 ```
 
 ## Layout
