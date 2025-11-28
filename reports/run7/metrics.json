@@ -1,7 +1,7 @@
 {
   "split": "test",
-  "accuracy": 0.52,
-  "f1_macro": 0.5263920719803072,
-  "f1_weighted": 0.5263920719803074,
+  "accuracy": 0.53,
+  "f1_macro": 0.5298587047328467,
+  "f1_weighted": 0.5298587047328466,
   "n_samples": 100
 }

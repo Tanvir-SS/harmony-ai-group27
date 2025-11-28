@@ -19,6 +19,8 @@ import pandas as pd
 import numpy as np
 import librosa
 
+
+
 # ----------------------------
 # Optional progress bar helper
 # ----------------------------
@@ -36,106 +38,121 @@ def pbar(it: Iterable[T], **kwargs: Any) -> Iterable[T]:
 # ----------------------------
 # Public API
 # ----------------------------
+
+
 def feature_names(cfg_feat: dict) -> List[str]:
     """
     Construct the feature column names in the exact order they are computed.
     """
     names: List[str] = []
 
-    # Tempo (single value)
+    # Tempo
     if cfg_feat.get("tempo", True):
         names.append("tempo")
 
-    # ZCR mean + std
+    # ZCR
     if cfg_feat.get("use_zcr", True):
         names += ["zcr_mean", "zcr_std"]
 
-    # Spectral centroid mean + std
+    # Spectral centroid
     if cfg_feat.get("use_spectral_centroid", True):
         names += ["spectral_centroid_mean", "spectral_centroid_std"]
-    # RMSE mean + std
+
+    # RMSE
     if cfg_feat.get("use_rmse", True):
         names += ["rmse_mean", "rmse_std"]
 
-    # Spectral bandwidth mean + std
+    # Spectral bandwidth
     if cfg_feat.get("use_spectral_bandwidth", True):
         names += ["spec_bandwidth_mean", "spec_bandwidth_std"]
 
-    # Spectral rolloff mean + std
+    # Spectral rolloff
     if cfg_feat.get("use_spectral_rolloff", True):
         names += ["spec_rolloff_mean", "spec_rolloff_std"]
 
-    # Spectral contrast: 7 frequency bands by default
-    if cfg_feat.get("use_spectral_contrast", True):
-        names += [f"spec_contrast_{i+1}_mean" for i in range(7)]
-        names += [f"spec_contrast_{i+1}_std"  for i in range(7)]
-
-    # Tonnetz: 6 dimensions
-    if cfg_feat.get("use_tonnetz", True):
-        names += [f"tonnetz_{i+1}_mean" for i in range(6)]
-        names += [f"tonnetz_{i+1}_std"  for i in range(6)]
-
-    # MFCC mean + std for each coefficient
+    # MFCCs
     n_mfcc = int(cfg_feat.get("n_mfcc", 13))
     names += [f"mfcc_{i+1}_mean" for i in range(n_mfcc)]
-    names += [f"mfcc_{i+1}_std" for i in range(n_mfcc)]
+    names += [f"mfcc_{i+1}_std"  for i in range(n_mfcc)]
 
-    # Chroma mean + std for each of 12 bins
+    # Delta MFCCs
+    if cfg_feat.get("use_mfcc_delta", True):
+        names += [f"mfcc_delta_{i+1}_mean" for i in range(n_mfcc)]
+        names += [f"mfcc_delta_{i+1}_std"  for i in range(n_mfcc)]
+
+    # Delta-delta MFCCs
+    if cfg_feat.get("use_mfcc_delta2", True):
+        names += [f"mfcc_delta2_{i+1}_mean" for i in range(n_mfcc)]
+        names += [f"mfcc_delta2_{i+1}_std"  for i in range(n_mfcc)]
+
+    # Chroma
     if cfg_feat.get("use_chroma", True):
         names += [f"chroma_{i+1}_mean" for i in range(12)]
-        names += [f"chroma_{i+1}_std" for i in range(12)]
+        names += [f"chroma_{i+1}_std"  for i in range(12)]
+
+    # Spectral contrast (7 bands by default)
+    if cfg_feat.get("use_spectral_contrast", True):
+        for i in range(7):
+            names.append(f"spec_contrast_{i+1}_mean")
+        for i in range(7):
+            names.append(f"spec_contrast_{i+1}_std")
+
+    # Tonnetz (6 dims)
+    if cfg_feat.get("use_tonnetz", True):
+        for i in range(6):
+            names.append(f"tonnetz_{i+1}_mean")
+        for i in range(6):
+            names.append(f"tonnetz_{i+1}_std")
 
     return names
+
 
 
 def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]:
     """
     Extract a fixed-length vector from a single audio file based on cfg_feat.
+    Includes tempo, ZCR, spectral features, MFCCs + deltas, chroma, etc.
     """
     sr = int(cfg_feat.get("sample_rate", 22050))
-    # Load mono at target rate; audioread backend allows multiple formats if FFmpeg is present
-    y, sr = librosa.load(audio_path, sr=sr, mono=True)
+    duration = float(cfg_feat.get("duration", 30.0))   
+    offset = float(cfg_feat.get("offset", 0.0))
+    res_type = cfg_feat.get("res_type", "kaiser_fast")
+
+    y, sr = librosa.load(
+        audio_path,
+        sr=sr,
+        mono=True,
+        duration=duration,
+        offset=offset,
+        res_type=res_type,
+    )
 
     feats: List[float] = []
 
-    # Helpers
     def _mean_std(x: np.ndarray) -> tuple[float, float]:
         if x.size == 0:
             return 0.0, 0.0
         x = np.asarray(x, dtype=float)
         return float(np.nanmean(x)), float(np.nanstd(x))
 
-    # Tempo (BPM) – single scalar
+    # Tempo
     if cfg_feat.get("tempo", True):
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
         feats.append(float(tempo))
 
-    # Zero-crossing rate (mean, std)
+    # ZCR
     if cfg_feat.get("use_zcr", True):
-        zcr = librosa.feature.zero_crossing_rate(y=y)  # shape (1, frames)
+        zcr = librosa.feature.zero_crossing_rate(y=y)
         m, s = _mean_std(zcr)
         feats.extend([m, s])
 
-    # Spectral centroid (mean, std)
+    # Spectral centroid
     if cfg_feat.get("use_spectral_centroid", True):
-        sc = librosa.feature.spectral_centroid(y=y, sr=sr)  # shape (1, frames)
+        sc = librosa.feature.spectral_centroid(y=y, sr=sr)
         m, s = _mean_std(sc)
         feats.extend([m, s])
 
-    # MFCC mean + std per coefficient
-    n_mfcc = int(cfg_feat.get("n_mfcc", 13))
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)  # shape (n_mfcc, frames)
-    for i in range(n_mfcc):
-        m, s = _mean_std(mfcc[i])
-        feats.extend([m, s])
-
-    # 12-bin chroma mean + std per bin
-    if cfg_feat.get("use_chroma", True):
-        chroma = librosa.feature.chroma_stft(y=y, sr=sr)  # shape (12, frames)
-        for i in range(12):
-            m, s = _mean_std(chroma[i])
-            feats.extend([m, s])
-    # RMSE (root-mean-square energy)
+    # RMSE
     if cfg_feat.get("use_rmse", True):
         rmse = librosa.feature.rms(y=y)
         m, s = _mean_std(rmse)
@@ -153,6 +170,34 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]
         m, s = _mean_std(roll)
         feats.extend([m, s])
 
+    # MFCCs
+    n_mfcc = int(cfg_feat.get("n_mfcc", 13))
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfcc)
+    for i in range(n_mfcc):
+        m, s = _mean_std(mfcc[i])
+        feats.extend([m, s])
+
+    # Delta MFCCs
+    if cfg_feat.get("use_mfcc_delta", True):
+        delta_mfcc = librosa.feature.delta(mfcc, order=1)
+        for i in range(n_mfcc):
+            m, s = _mean_std(delta_mfcc[i])
+            feats.extend([m, s])
+
+    # Delta-delta MFCCs
+    if cfg_feat.get("use_mfcc_delta2", True):
+        delta2_mfcc = librosa.feature.delta(mfcc, order=2)
+        for i in range(n_mfcc):
+            m, s = _mean_std(delta2_mfcc[i])
+            feats.extend([m, s])
+
+    # Chroma
+    if cfg_feat.get("use_chroma", True):
+        chroma = librosa.feature.chroma_stft(y=y, sr=sr)
+        for i in range(chroma.shape[0]):
+            m, s = _mean_std(chroma[i])
+            feats.extend([m, s])
+
     # Spectral contrast
     if cfg_feat.get("use_spectral_contrast", True):
         contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
@@ -160,7 +205,7 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]
             m, s = _mean_std(contrast[i])
             feats.extend([m, s])
 
-    # Tonnetz (uses harmonic component)
+    # Tonnetz
     if cfg_feat.get("use_tonnetz", True):
         y_harm = librosa.effects.harmonic(y)
         tonnetz = librosa.feature.tonnetz(y=y_harm, sr=sr)
@@ -168,7 +213,7 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]
             m, s = _mean_std(tonnetz[i])
             feats.extend([m, s])
 
-    # Replace any lingering NaNs/Infs
+    # Clean NaNs/Infs
     feats = list(
         np.nan_to_num(
             np.asarray(feats, dtype=float),
@@ -178,6 +223,7 @@ def extract_fixed_feature_vector(audio_path: str, cfg_feat: dict) -> List[float]
         )
     )
     return feats
+
 
 
 def extract_features_for_splits(cfg: dict) -> None:
