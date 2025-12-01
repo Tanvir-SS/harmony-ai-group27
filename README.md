@@ -4,7 +4,7 @@ Genre classification & playlist grouping using GTZAN + Random Forest.
 
 ## Quickstart
 
-From the zip file you will have to download GTZAN data set and place the genre folders that contain their .wav files into the data\raw\gtzan. After downloading the dataset. Please follow the instructions below to set up the virtual enviroment, for the zip folder they environment may already be contained in .venv . You can run the pipeline or jump straight into the main model via running: python -m harmony_ai.ui_gradio It may take up to 500 seconds to classify and sort the first set of inputs. After that it takes about 20 seconds.
+You will have to download GTZAN data set and place the genre folders that contain their .wav files into the data\raw\gtzan. After downloading the dataset. Please follow the instructions below to set up the virtual enviroment. You can run the pipeline or jump straight into the main model via running: python -m harmony_ai.ui_gradio It may take up to 500 seconds to classify and sort the first set of inputs. After that it takes about 20 seconds.
 
 GTZAN data link: https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification
 Put GTZAN here (genre folders):
